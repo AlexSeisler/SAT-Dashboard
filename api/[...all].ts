@@ -1,7 +1,7 @@
 import express from "express";
 import { createServer } from "http";
 import type { IncomingMessage, ServerResponse } from "http";
-import { registerRoutes } from "./server/routes";
+import { registerRoutes } from "../server/routes";
 
 // Create an express app and register routes but do NOT call listen().
 // Vercel will invoke this file per request; we reuse the same app instance
@@ -28,6 +28,5 @@ void (async () => {
 
 export default function handler(req: IncomingMessage, res: ServerResponse) {
   // Express apps are also request handlers: (req,res) => void
-  // @ts-expect-error - Node's IncomingMessage/ServerResponse are compatible with Express types at runtime
   return (app as any)(req, res);
 }

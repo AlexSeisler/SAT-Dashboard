@@ -9,7 +9,7 @@
     "start": "cross-env NODE_ENV=production node dist/index.cjs",
     "check": "tsc",
     "db:push": "drizzle-kit push",
-    "postbuild": "mkdir -p .vercel/output/static && cp -r dist/public/* .vercel/output/static/"
+    "postbuild": "node ./script/postbuild.js"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.10.0",
