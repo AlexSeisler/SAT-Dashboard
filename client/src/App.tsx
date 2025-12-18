@@ -3,14 +3,21 @@ import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { ThemeProvider } from "@/lib/theme-provider";
+import { Header } from "@/components/layout/header";
+import { ChatPanel } from "@/components/chatbot/chat-panel";
+import Dashboard from "@/pages/dashboard";
+import Roadmap from "@/pages/roadmap";
+import LearningZone from "@/pages/learning-zone";
 import NotFound from "@/pages/not-found";
 
 function Router() {
   return (
     <Switch>
-      {/* Add pages below */}
-      {/* <Route path="/" component={Home}/> */}
-      {/* Fallback to 404 */}
+      <Route path="/" component={Dashboard} />
+      <Route path="/roadmap" component={Roadmap} />
+      <Route path="/learn" component={LearningZone} />
+      <Route path="/learn/:topicId" component={LearningZone} />
       <Route component={NotFound} />
     </Switch>
   );
@@ -19,10 +26,18 @@ function Router() {
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <Toaster />
-        <Router />
-      </TooltipProvider>
+      <ThemeProvider defaultTheme="light" storageKey="sat-roadmap-theme">
+        <TooltipProvider>
+          <div className="min-h-screen bg-background">
+            <Header />
+            <main>
+              <Router />
+            </main>
+            <ChatPanel />
+          </div>
+          <Toaster />
+        </TooltipProvider>
+      </ThemeProvider>
     </QueryClientProvider>
   );
 }
