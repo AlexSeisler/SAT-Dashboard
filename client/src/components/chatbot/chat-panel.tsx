@@ -1,10 +1,11 @@
 import { useState, useRef, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { MessageCircle, Send, Bot, User, X, Sparkles } from "lucide-react";
+import { MessageCircle, Send, Bot, User, Sparkles } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface Message {
@@ -16,35 +17,35 @@ interface Message {
 
 const getMockedResponse = (userMessage: string, context?: string): string => {
   const lowerMessage = userMessage.toLowerCase();
-  
+
   if (lowerMessage.includes("help") || lowerMessage.includes("stuck")) {
     return "I'm here to help! Can you tell me more specifically what you're finding challenging? I can break down the concept step by step, or we can try a different approach if that works better for you.";
   }
-  
+
   if (lowerMessage.includes("explain") || lowerMessage.includes("understand")) {
     return "Great question! Let me break this down for you. The key concept here is to think about it in smaller parts. Would you like me to walk through an example together?";
   }
-  
+
   if (lowerMessage.includes("practice") || lowerMessage.includes("more")) {
     return "Practice is a great idea! I'd recommend focusing on similar problems first to build your confidence. Would you like me to suggest which topic areas would give you the most improvement?";
   }
-  
+
   if (lowerMessage.includes("score") || lowerMessage.includes("progress")) {
     return "Your progress is looking good! You've been consistent with your studying, which is the most important factor. Keep focusing on your recommended topics, and you'll see improvement in your projected score.";
   }
-  
+
   if (lowerMessage.includes("tired") || lowerMessage.includes("frustrated") || lowerMessage.includes("hard")) {
     return "I understand - SAT prep can be demanding. It's completely normal to feel this way sometimes. Remember, taking breaks is important for learning. Would you like some tips on how to study more efficiently?";
   }
-  
+
   if (lowerMessage.includes("math")) {
     return "Math is one of the areas where consistent practice really pays off. For SAT math, focus on understanding the concepts rather than memorizing formulas. What specific type of math problem would you like help with?";
   }
-  
+
   if (lowerMessage.includes("reading") || lowerMessage.includes("passage")) {
     return "For reading passages, try to identify the main idea first before diving into the questions. Annotating key points as you read can also help. Would you like some strategies for different question types?";
   }
-  
+
   if (lowerMessage.includes("writing") || lowerMessage.includes("grammar")) {
     return "Writing and language questions often test the same grammar rules repeatedly. Focus on understanding comma usage, subject-verb agreement, and clear/concise expression. Want me to explain any of these in more detail?";
   }
@@ -66,7 +67,8 @@ export function ChatPanel({ context }: ChatPanelProps) {
     {
       id: "welcome",
       role: "assistant",
-      content: "Hi! I'm your SAT study assistant. I'm here to help explain concepts, answer questions, and support you throughout your preparation. How can I help you today?",
+      content:
+        "Hi! I'm your SAT study assistant. I'm here to help explain concepts, answer questions, and support you throughout your preparation. How can I help you today?",
       timestamp: new Date(),
     },
   ]);
@@ -116,14 +118,29 @@ export function ChatPanel({ context }: ChatPanelProps) {
 
   return (
     <>
-      <Button
-        onClick={() => setIsOpen(true)}
-        className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 left-auto h-14 w-14 rounded-full shadow-lg z-50 hover:scale-110 transition-transform"
-        size="icon"
-        data-testid="button-open-chat"
-      >
-        <MessageCircle className="h-6 w-6" />
-      </Button>
+      {/* ✅ Floating Chat Button rendered via React Portal with isolation wrapper */}
+      {typeof window !== "undefined" &&
+        createPortal(
+          <div
+            style={{
+              position: "fixed",
+              bottom: "1.5rem",
+              right: "1.5rem",
+              zIndex: 9999,
+              pointerEvents: "auto",
+            }}
+          >
+            <Button
+              onClick={() => setIsOpen(true)}
+              size="icon"
+              data-testid="button-open-chat"
+              className="h-14 w-14 rounded-full bg-primary text-primary-foreground shadow-xl hover:scale-110 hover:bg-primary/90 transition-transform"
+            >
+              <MessageCircle className="h-6 w-6" />
+            </Button>
+          </div>,
+          document.body
+        )}
 
       <Sheet open={isOpen} onOpenChange={setIsOpen}>
         <SheetContent side="right" className="w-full sm:max-w-md p-0 flex flex-col">
@@ -154,11 +171,13 @@ export function ChatPanel({ context }: ChatPanelProps) {
                   )}
                 >
                   <Avatar className="h-8 w-8 shrink-0">
-                    <AvatarFallback className={cn(
-                      message.role === "assistant" 
-                        ? "bg-primary/10 text-primary" 
-                        : "bg-muted"
-                    )}>
+                    <AvatarFallback
+                      className={cn(
+                        message.role === "assistant"
+                          ? "bg-primary/10 text-primary"
+                          : "bg-muted"
+                      )}
+                    >
                       {message.role === "assistant" ? (
                         <Bot className="h-4 w-4" />
                       ) : (
@@ -211,8 +230,8 @@ export function ChatPanel({ context }: ChatPanelProps) {
                 className="flex-1"
                 data-testid="input-chat"
               />
-              <Button 
-                onClick={handleSend} 
+              <Button
+                onClick={handleSend}
                 size="icon"
                 disabled={!input.trim() || isTyping}
                 data-testid="button-send-message"

@@ -26,7 +26,7 @@ function Router() {
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <ThemeProvider defaultTheme="light" storageKey="sat-roadmap-theme">
+      <ThemeProvider defaultTheme="dark" storageKey="sat-roadmap-theme">
         <TooltipProvider>
           <div className="min-h-screen bg-background">
             <Header />
