@@ -1,11 +1,11 @@
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ReadinessBadge, ScoreDisplay } from "@/components/dashboard/readiness-badge";
+import { ScoreDisplay } from "@/components/dashboard/readiness-badge";
 import { RecommendationsList } from "@/components/dashboard/recommendation-card";
 import { StreakDisplay } from "@/components/dashboard/streak-display";
 import { Link } from "wouter";
-import { ArrowRight, Map, BookOpen, Target, TrendingUp, Zap, AlertCircle } from "lucide-react";
+import { ArrowRight, Map, BookOpen, Target, CalendarClock, Zap, AlertCircle } from "lucide-react";
 import { useCurrentStudent, useDashboard, useRecommendations } from "@/hooks/use-student";
 
 function DashboardSkeleton() {
@@ -61,6 +61,11 @@ export default function Dashboard() {
   const { data: dashboard, isLoading: dashboardLoading } = useDashboard(student?.id);
   const { data: recommendations, isLoading: recsLoading } = useRecommendations(student?.id);
 
+  const SAT_DATE = new Date("2026-06-06T08:00:00");
+  const now = new Date();
+  const daysUntilSat = Math.max(0, Math.ceil((SAT_DATE.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)));
+  const weeksUntilSat = Math.max(0, Math.ceil(daysUntilSat / 7));
+
   if (studentLoading || dashboardLoading) {
     return <DashboardSkeleton />;
   }
@@ -79,7 +84,6 @@ export default function Dashboard() {
     );
   }
 
-  const readinessState = dashboard?.readinessState || "borderline";
   const streakInfo = dashboard?.streakInfo || { current: student.studyStreak, needsRecovery: false };
 
   return (
@@ -112,15 +116,22 @@ export default function Dashboard() {
               </CardContent>
             </Card>
 
-            <Card data-testid="card-readiness">
+            <Card data-testid="card-prep-timer">
               <CardHeader className="pb-2">
                 <div className="flex items-center gap-2">
-                  <TrendingUp className="h-4 w-4 text-muted-foreground" />
-                  <CardTitle className="text-base">Readiness</CardTitle>
+                  <CalendarClock className="h-4 w-4 text-muted-foreground" />
+                  <CardTitle className="text-base">Prep Time Remaining</CardTitle>
                 </div>
               </CardHeader>
               <CardContent className="pt-2">
-                <ReadinessBadge state={readinessState} />
+                <div className="space-y-1">
+                  <div className="text-3xl font-bold tabular-nums" data-testid="text-days-until-sat">
+                    {daysUntilSat} days
+                  </div>
+                  <p className="text-sm text-muted-foreground">
+                    ~{weeksUntilSat} weeks until test day (June 6, 2026)
+                  </p>
+                </div>
               </CardContent>
             </Card>
           </div>
@@ -191,22 +202,6 @@ export default function Dashboard() {
               <p className="text-sm text-muted-foreground leading-relaxed">
                 Consistency matters more than intensity. Even 20-30 minutes of focused practice each day is more effective than marathon study sessions.
               </p>
-            </CardContent>
-          </Card>
-
-          <Card className="bg-primary/5 border-primary/20" data-testid="card-encouragement">
-            <CardContent className="pt-6">
-              <div className="text-center space-y-2">
-                <div className="text-4xl font-bold text-primary tabular-nums">
-                  {streakInfo.current}
-                </div>
-                <p className="text-sm text-muted-foreground">
-                  {streakInfo.current === 1 ? "day" : "days"} of consistent study
-                </p>
-                <p className="text-xs text-muted-foreground">
-                  Keep it up — you're building great habits
-                </p>
-              </div>
             </CardContent>
           </Card>
         </div>

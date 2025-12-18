@@ -118,7 +118,7 @@ export function ChatPanel({ context }: ChatPanelProps) {
     <>
       <Button
         onClick={() => setIsOpen(true)}
-        className="fixed bottom-6 right-6 h-14 w-14 rounded-full shadow-lg z-50 hover:scale-110 transition-transform"
+        className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 left-auto h-14 w-14 rounded-full shadow-lg z-50 hover:scale-110 transition-transform"
         size="icon"
         data-testid="button-open-chat"
       >
