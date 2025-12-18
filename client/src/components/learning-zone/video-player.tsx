@@ -17,6 +17,10 @@ interface VideoPlayerProps {
   checkpoints: Checkpoint[];
   onCheckpointReached: (checkpoint: Checkpoint) => void;
   onComplete: () => void;
+  initialTime?: number;
+  paused?: boolean;
+  resumeSignal?: number;
+  onTimeUpdate?: (currentTime: number) => void;
 }
 
 export function VideoPlayer({
@@ -26,14 +30,47 @@ export function VideoPlayer({
   checkpoints,
   onCheckpointReached,
   onComplete,
+  initialTime = 0,
+  paused = false,
+  resumeSignal = 0,
+  onTimeUpdate,
 }: VideoPlayerProps) {
   const [isPlaying, setIsPlaying] = useState(false);
-  const [currentTime, setCurrentTime] = useState(0);
+  const [currentTime, setCurrentTime] = useState(initialTime);
   const [isMuted, setIsMuted] = useState(false);
   const [passedCheckpoints, setPassedCheckpoints] = useState<Set<number>>(new Set());
   const videoRef = useRef<HTMLVideoElement>(null);
+  const hasAppliedInitialTime = useRef(false);
 
   const progress = (currentTime / duration) * 100;
+
+  useEffect(() => {
+    if (!hasAppliedInitialTime.current) {
+      setCurrentTime(Math.min(initialTime, duration));
+      hasAppliedInitialTime.current = true;
+    }
+  }, [initialTime, duration]);
+
+  useEffect(() => {
+    // Mark checkpoints that should already be considered passed on resume
+    const alreadyPassed = checkpoints
+      .filter((checkpoint) => initialTime >= checkpoint.time)
+      .map((checkpoint) => checkpoint.time);
+    setPassedCheckpoints(new Set(alreadyPassed));
+  }, [checkpoints, initialTime]);
+
+  useEffect(() => {
+    if (paused) {
+      setIsPlaying(false);
+    }
+  }, [paused]);
+
+  useEffect(() => {
+    // resumeSignal increments whenever parent wants to resume playback
+    if (!paused) {
+      setIsPlaying(true);
+    }
+  }, [resumeSignal, paused]);
 
   useEffect(() => {
     checkpoints.forEach((checkpoint) => {
@@ -48,6 +85,7 @@ export function VideoPlayer({
     });
 
     if (currentTime >= duration && duration > 0) {
+      setIsPlaying(false);
       onComplete();
     }
   }, [currentTime, checkpoints, duration, passedCheckpoints, onCheckpointReached, onComplete]);
@@ -61,6 +99,10 @@ export function VideoPlayer({
     }
     return () => clearInterval(interval);
   }, [isPlaying, duration]);
+
+  useEffect(() => {
+    onTimeUpdate?.(currentTime);
+  }, [currentTime, onTimeUpdate]);
 
   const togglePlay = () => {
     setIsPlaying(!isPlaying);
