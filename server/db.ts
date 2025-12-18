@@ -1,8 +1,6 @@
-import { drizzle } from "drizzle-orm/node-postgres";
-import pg from "pg";
+import { drizzle } from "drizzle-orm/postgres-js";
+import postgres from "postgres";
 import * as schema from "@shared/schema";
-
-const { Pool } = pg;
 
 if (!process.env.DATABASE_URL) {
   throw new Error(
@@ -10,5 +8,10 @@ if (!process.env.DATABASE_URL) {
   );
 }
 
-export const pool = new Pool({ connectionString: process.env.DATABASE_URL });
-export const db = drizzle(pool, { schema });
+// Create postgres client optimized for Supabase + Vercel
+const client = postgres(process.env.DATABASE_URL, {
+  prepare: false,  // Required for Supabase pgBouncer/transaction pooler
+  max: 1,          // Limit connections in serverless
+});
+
+export const db = drizzle(client, { schema });

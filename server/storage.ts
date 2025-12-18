@@ -163,10 +163,6 @@ export class DatabaseStorage implements IStorage {
     return question || undefined;
   }
 
-  async createQuestion(insertQuestion: InsertQuestion): Promise<Question> {
-    const [question] = await db.insert(questions).values(insertQuestion).returning();
-    return question;
-  }
 
   // Question attempts
   async recordQuestionAttempt(attempt: InsertQuestionAttempt): Promise<QuestionAttempt> {
@@ -180,11 +176,7 @@ export class DatabaseStorage implements IStorage {
       .orderBy(desc(questionAttempts.attemptedAt));
   }
 
-  // Daily check-ins
-  async createDailyCheckIn(checkIn: InsertDailyCheckIn): Promise<DailyCheckIn> {
-    const [record] = await db.insert(dailyCheckIns).values(checkIn).returning();
-    return record;
-  }
+
 
   async getStudentCheckIns(studentId: string, limit = 30): Promise<DailyCheckIn[]> {
     return db.select().from(dailyCheckIns)
