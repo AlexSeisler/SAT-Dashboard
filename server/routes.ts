@@ -303,40 +303,97 @@ export async function registerRoutes(
   
   app.post("/api/seed", async (req, res) => {
     try {
-      // Check if topics already exist
+      // Check if topics already exist - allow re-seeding by clearing first
       const existingTopics = await storage.getAllTopics();
       if (existingTopics.length > 0) {
-        return res.json({ message: "Data already seeded", topics: existingTopics.length });
+        // Clear existing topics and related data for fresh seed
+        // Note: This will cascade delete related questions, progress, etc.
+        const { db } = await import("./db");
+        const { topics, questions, studentTopicProgress } = await import("@shared/schema");
+        
+        // Delete in order to respect foreign key constraints
+        await db.delete(studentTopicProgress);
+        await db.delete(questions);
+        await db.delete(topics);
       }
 
       // Seed topics
       const mathTopics = [
-        { section: "math" as const, name: "Linear Equations", description: "Solving one and two-variable linear equations", order: 1, scoreImpact: 25, testFrequency: 8 },
-        { section: "math" as const, name: "Quadratic Functions", description: "Understanding parabolas and quadratic expressions", order: 2, scoreImpact: 20, testFrequency: 6 },
-        { section: "math" as const, name: "Systems of Equations", description: "Solving systems using substitution and elimination", order: 3, scoreImpact: 18, testFrequency: 5 },
-        { section: "math" as const, name: "Polynomials", description: "Operations with polynomial expressions", order: 4, scoreImpact: 15, testFrequency: 4 },
-        { section: "math" as const, name: "Ratios & Percentages", description: "Working with proportional relationships", order: 5, scoreImpact: 15, testFrequency: 7 },
-        { section: "math" as const, name: "Geometry Basics", description: "Area, perimeter, and basic geometric properties", order: 6, scoreImpact: 12, testFrequency: 5 },
-        { section: "math" as const, name: "Trigonometry", description: "Basic trigonometric functions and relationships", order: 7, scoreImpact: 10, testFrequency: 3 },
-        { section: "math" as const, name: "Data Analysis", description: "Statistics, probability, and data interpretation", order: 8, scoreImpact: 18, testFrequency: 6 },
+        // Heart of Algebra
+        { section: "math" as const, name: "Variables and Constants", description: "Differentiates changing quantities from fixed values", order: 1, scoreImpact: 20, testFrequency: 10 },
+        { section: "math" as const, name: "Linear Equations and Expressions", description: "Solves and interprets linear relationships", order: 2, scoreImpact: 25, testFrequency: 12 },
+        { section: "math" as const, name: "Coordinate Plane", description: "Graphs points, lines, and functions", order: 3, scoreImpact: 18, testFrequency: 8 },
+        { section: "math" as const, name: "Slope and Intercepts", description: "Analyzes rate of change and starting values", order: 4, scoreImpact: 20, testFrequency: 9 },
+        { section: "math" as const, name: "Linear Inequalities", description: "Solves and graphs inequality relationships", order: 5, scoreImpact: 15, testFrequency: 7 },
+        { section: "math" as const, name: "Solution Sets", description: "Identifies values that satisfy equations or inequalities", order: 6, scoreImpact: 16, testFrequency: 8 },
+        { section: "math" as const, name: "Constraints", description: "Applies real-world limits to mathematical models", order: 7, scoreImpact: 12, testFrequency: 5 },
+        { section: "math" as const, name: "Systems of Linear Equations", description: "Solves using elimination, substitution, or graphing", order: 8, scoreImpact: 22, testFrequency: 10 },
+        
+        // Problem Solving and Data Analysis
+        { section: "math" as const, name: "Ratios and Proportions", description: "Compares quantities and parts to wholes", order: 9, scoreImpact: 18, testFrequency: 9 },
+        { section: "math" as const, name: "Percentages", description: "Converts and interprets percent relationships", order: 10, scoreImpact: 20, testFrequency: 10 },
+        { section: "math" as const, name: "Data Interpretation", description: "Reads tables, graphs, and charts", order: 11, scoreImpact: 15, testFrequency: 8 },
+        { section: "math" as const, name: "Confidence Intervals", description: "Understands estimation accuracy and margin of error", order: 12, scoreImpact: 10, testFrequency: 4 },
+        { section: "math" as const, name: "Simple and Compound Interest", description: "Calculates interest over time", order: 13, scoreImpact: 12, testFrequency: 5 },
+        
+        // Passport to Advanced Math
+        { section: "math" as const, name: "Function Notation", description: "Works with inputs, outputs, and functional relationships", order: 14, scoreImpact: 18, testFrequency: 8 },
+        { section: "math" as const, name: "Quadratic Equations", description: "Solves using factoring and completing the square", order: 15, scoreImpact: 22, testFrequency: 9 },
+        { section: "math" as const, name: "Polynomial Analysis", description: "Interprets higher-level algebraic expressions", order: 16, scoreImpact: 15, testFrequency: 6 },
+        { section: "math" as const, name: "Functions in Context", description: "Applies equations to real-world scenarios", order: 17, scoreImpact: 20, testFrequency: 8 },
       ];
 
       const readingTopics = [
-        { section: "reading" as const, name: "Main Idea", description: "Identifying central themes in passages", order: 1, scoreImpact: 20, testFrequency: 10 },
-        { section: "reading" as const, name: "Supporting Details", description: "Finding evidence and supporting information", order: 2, scoreImpact: 15, testFrequency: 8 },
-        { section: "reading" as const, name: "Inference", description: "Drawing conclusions from text", order: 3, scoreImpact: 18, testFrequency: 7 },
-        { section: "reading" as const, name: "Vocabulary in Context", description: "Understanding word meanings from context", order: 4, scoreImpact: 12, testFrequency: 6 },
-        { section: "reading" as const, name: "Author's Purpose", description: "Understanding why authors write what they write", order: 5, scoreImpact: 15, testFrequency: 5 },
-        { section: "reading" as const, name: "Text Structure", description: "Analyzing how texts are organized", order: 6, scoreImpact: 10, testFrequency: 4 },
+        // Test Structure
+        { section: "reading" as const, name: "Test Structure and Adaptive Format", description: "Explains the two-module adaptive design and timing of the Reading and Writing section", order: 1, scoreImpact: 5, testFrequency: 1 },
+        
+        // Craft and Structure
+        { section: "reading" as const, name: "Vocabulary in Context", description: "Tests understanding word meaning based on surrounding text clues", order: 2, scoreImpact: 18, testFrequency: 10 },
+        { section: "reading" as const, name: "High-Utility Words", description: "Emphasizes commonly used academic and functional vocabulary", order: 3, scoreImpact: 15, testFrequency: 8 },
+        { section: "reading" as const, name: "Text Structure", description: "Evaluates how passages are organized (cause-effect, compare-contrast, etc.)", order: 4, scoreImpact: 12, testFrequency: 7 },
+        { section: "reading" as const, name: "Author's Purpose and Tone", description: "Identifies why an author wrote a passage and how language reflects intent", order: 5, scoreImpact: 20, testFrequency: 9 },
+        
+        // Reading Comprehension
+        { section: "reading" as const, name: "Basic Reading Comprehension", description: "Assesses understanding of explicitly stated ideas", order: 6, scoreImpact: 22, testFrequency: 12 },
+        { section: "reading" as const, name: "Higher-Level Comprehension", description: "Requires analysis, synthesis, and reasoning beyond surface details", order: 7, scoreImpact: 25, testFrequency: 11 },
+        { section: "reading" as const, name: "Central Ideas", description: "Focuses on identifying and supporting a passage's main point", order: 8, scoreImpact: 23, testFrequency: 10 },
+        { section: "reading" as const, name: "Details and Evidence", description: "Requires selecting the most relevant and convincing support", order: 9, scoreImpact: 20, testFrequency: 9 },
+        { section: "reading" as const, name: "Inferences", description: "Draws logical conclusions from implied information", order: 10, scoreImpact: 22, testFrequency: 10 },
+        { section: "reading" as const, name: "Comparing Two Texts", description: "Analyzes similarities, differences, and responses between paired passages", order: 11, scoreImpact: 15, testFrequency: 6 },
+        { section: "reading" as const, name: "Informational Graphics", description: "Interprets tables, charts, and graphs alongside text", order: 12, scoreImpact: 12, testFrequency: 5 },
       ];
 
       const writingTopics = [
-        { section: "writing" as const, name: "Subject-Verb Agreement", description: "Matching subjects with correct verb forms", order: 1, scoreImpact: 18, testFrequency: 8 },
-        { section: "writing" as const, name: "Comma Usage", description: "Using commas correctly in various contexts", order: 2, scoreImpact: 15, testFrequency: 9 },
-        { section: "writing" as const, name: "Pronoun Agreement", description: "Matching pronouns with their antecedents", order: 3, scoreImpact: 12, testFrequency: 6 },
-        { section: "writing" as const, name: "Sentence Structure", description: "Creating clear and effective sentences", order: 4, scoreImpact: 15, testFrequency: 7 },
-        { section: "writing" as const, name: "Conciseness", description: "Eliminating wordiness and redundancy", order: 5, scoreImpact: 10, testFrequency: 5 },
-        { section: "writing" as const, name: "Transitions", description: "Connecting ideas smoothly between sentences", order: 6, scoreImpact: 12, testFrequency: 6 },
+        // Writing: Effective Presentation
+        { section: "writing" as const, name: "Word Choice and Precision", description: "Tests selecting the most accurate and appropriate words", order: 1, scoreImpact: 18, testFrequency: 9 },
+        { section: "writing" as const, name: "Concision", description: "Focuses on eliminating redundancy and unnecessary language", order: 2, scoreImpact: 20, testFrequency: 10 },
+        { section: "writing" as const, name: "Style and Tone Consistency", description: "Ensures language matches the passage's overall formality and intent", order: 3, scoreImpact: 15, testFrequency: 7 },
+        { section: "writing" as const, name: "Author's Goals", description: "Aligns structure and details with the writer's purpose", order: 4, scoreImpact: 16, testFrequency: 8 },
+        { section: "writing" as const, name: "Flow and Coherence", description: "Improves readability and logical progression of ideas", order: 5, scoreImpact: 18, testFrequency: 8 },
+        { section: "writing" as const, name: "Syntax", description: "Evaluates sentence structure and clarity", order: 6, scoreImpact: 20, testFrequency: 9 },
+        { section: "writing" as const, name: "Organization", description: "Assesses logical sequencing, introductions, transitions, and conclusions", order: 7, scoreImpact: 22, testFrequency: 10 },
+        { section: "writing" as const, name: "Development and Support", description: "Ensures claims are clearly stated and well supported", order: 8, scoreImpact: 20, testFrequency: 9 },
+        { section: "writing" as const, name: "Transitions", description: "Uses words and phrases to guide readers between ideas", order: 9, scoreImpact: 18, testFrequency: 8 },
+        
+        // Writing: Standard English Conventions
+        { section: "writing" as const, name: "Sentence Structure", description: "Covers fragments, run-ons, modifiers, and parallelism", order: 10, scoreImpact: 25, testFrequency: 12 },
+        { section: "writing" as const, name: "Verb Tense and Consistency", description: "Ensures grammatical alignment throughout passages", order: 11, scoreImpact: 20, testFrequency: 10 },
+        { section: "writing" as const, name: "Pronoun Clarity and Agreement", description: "Tests correct reference, number, and point of view", order: 12, scoreImpact: 22, testFrequency: 11 },
+        { section: "writing" as const, name: "Frequently Confused Words", description: "Distinguishes commonly misused word pairs", order: 13, scoreImpact: 15, testFrequency: 7 },
+        { section: "writing" as const, name: "Logical Comparisons", description: "Ensures valid and meaningful comparisons", order: 14, scoreImpact: 12, testFrequency: 6 },
+        { section: "writing" as const, name: "Punctuation Rules", description: "Covers commas, semicolons, colons, dashes, quotation marks, and parentheses", order: 15, scoreImpact: 23, testFrequency: 11 },
+        { section: "writing" as const, name: "Possessives", description: "Tests correct use of apostrophes in nouns and pronouns", order: 16, scoreImpact: 15, testFrequency: 7 },
+        
+        // Essay-related topics (mapped to writing section)
+        { section: "writing" as const, name: "Essay Overview", description: "Explains the purpose, format, timing, and expectations of the SAT argumentative analysis essay", order: 17, scoreImpact: 8, testFrequency: 2 },
+        { section: "writing" as const, name: "Essay Scoring Criteria", description: "Describes how essays are scored across Reading, Analysis, and Writing dimensions", order: 18, scoreImpact: 8, testFrequency: 2 },
+        { section: "writing" as const, name: "Reading for the Essay", description: "Focuses on understanding the author's argument, evidence, and reasoning", order: 19, scoreImpact: 10, testFrequency: 3 },
+        { section: "writing" as const, name: "Analysis Skills", description: "Emphasizes evaluating how an author builds an argument using evidence, logic, and rhetorical techniques", order: 20, scoreImpact: 12, testFrequency: 4 },
+        { section: "writing" as const, name: "Writing Quality", description: "Covers organization, clarity, grammar, and adherence to formal Standard Written English", order: 21, scoreImpact: 15, testFrequency: 5 },
+        { section: "writing" as const, name: "Use of Evidence", description: "Teaches how to identify, explain, and evaluate evidence used to support an argument", order: 22, scoreImpact: 12, testFrequency: 4 },
+        { section: "writing" as const, name: "Reasoning and Logic", description: "Examines assumptions, conclusions, and the logical strength of arguments", order: 23, scoreImpact: 15, testFrequency: 5 },
+        { section: "writing" as const, name: "Style and Persuasion", description: "Analyzes rhetorical choices such as repetition, structure, and tone", order: 24, scoreImpact: 12, testFrequency: 4 },
+        { section: "writing" as const, name: "Objective Writing", description: "Reinforces writing without personal opinion, relying only on the given passage", order: 25, scoreImpact: 10, testFrequency: 3 },
       ];
 
       const allTopics = [...mathTopics, ...readingTopics, ...writingTopics];
@@ -347,8 +404,8 @@ export async function registerRoutes(
         createdTopics.push(created);
       }
 
-      // Seed questions for the first math topic (Linear Equations)
-      const linearEquationsTopic = createdTopics.find(t => t.name === "Linear Equations");
+      // Seed questions for the first math topic (Linear Equations and Expressions)
+      const linearEquationsTopic = createdTopics.find(t => t.name === "Linear Equations and Expressions");
       if (linearEquationsTopic) {
         const questions = [
           {
