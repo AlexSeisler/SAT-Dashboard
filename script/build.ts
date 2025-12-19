@@ -47,19 +47,38 @@ async function buildAll() {
 
   // ✅ Build server as ESM instead of CJS
   await esbuild({
-    entryPoints: ["server/index.ts"],
-    platform: "node",
-    bundle: true,
-    format: "esm",               // <--- ESM output format
-    outfile: "dist/index.mjs",   // <--- ESM file extension
-    define: {
-      "process.env.NODE_ENV": '"production"',
-    },
-    minify: true,
-    external: externals,
-    logLevel: "info",
-    target: ["node20"],          // <--- ensure Node 20 compatibility
-  });
+  entryPoints: ["server/index.ts"],
+  platform: "node",
+  bundle: true,
+  format: "esm",
+  outfile: "dist/index.mjs",
+  define: {
+    "process.env.NODE_ENV": '"production"',
+  },
+  minify: true,
+  external: [
+    ...externals,
+    // 👇 Add all native Node built-ins here
+    "path",
+    "url",
+    "fs",
+    "os",
+    "crypto",
+    "http",
+    "https",
+    "stream",
+    "zlib",
+    "util",
+    "events",
+    "querystring",
+    "child_process",
+    "net",
+    "tls",
+  ],
+  logLevel: "info",
+  target: ["node20"],
+});
+
 }
 
 buildAll().catch((err) => {
