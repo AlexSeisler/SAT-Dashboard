@@ -8,8 +8,12 @@ I took the approach of finding the core pain points that students preparing for 
 
 Experience the SAT Roadmap Dashboard live: [https://sat-dashboard-v4s0.onrender.com](https://sat-dashboard-v4s0.onrender.com)
 
+**Alternate Builds / Prototypes:**  
+- https://sat-roadmap-cede8620.base44.app  
+- https://sat-dashboard-bolt.netlify.app
+
 ## About This Project
 
-I was experimenting with new AI tools and it created
+I was experimenting with new AI tools(Prototypes included) and it created
 the base project around an Express - Node hybrid so I figured I'd make it work, but it made
 deployment flaky so I included SS's in the release page of the repo. Thanks for the oppurtunity.
