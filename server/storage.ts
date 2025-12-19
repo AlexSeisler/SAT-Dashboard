@@ -164,6 +164,11 @@ export class DatabaseStorage implements IStorage {
   }
 
 
+  async createQuestion(question: InsertQuestion): Promise<Question> {
+    const [created] = await db.insert(questions).values(question).returning();
+    return created;
+  }
+
   // Question attempts
   async recordQuestionAttempt(attempt: InsertQuestionAttempt): Promise<QuestionAttempt> {
     const [record] = await db.insert(questionAttempts).values(attempt).returning();
@@ -177,6 +182,11 @@ export class DatabaseStorage implements IStorage {
   }
 
 
+
+  async createDailyCheckIn(checkIn: InsertDailyCheckIn): Promise<DailyCheckIn> {
+    const [created] = await db.insert(dailyCheckIns).values(checkIn).returning();
+    return created;
+  }
 
   async getStudentCheckIns(studentId: string, limit = 30): Promise<DailyCheckIn[]> {
     return db.select().from(dailyCheckIns)

@@ -146,9 +146,17 @@ export const videoContentRelations = relations(videoContent, ({ one }) => ({
 export const insertStudentSchema = createInsertSchema(students).omit({ id: true, createdAt: true });
 export const insertTopicSchema = createInsertSchema(topics).omit({ id: true });
 export const insertStudentTopicProgressSchema = createInsertSchema(studentTopicProgress).omit({ id: true });
-export const insertQuestionSchema = createInsertSchema(questions).omit({ id: true });
+export const insertQuestionSchema = createInsertSchema(questions)
+  .omit({ id: true })
+  .extend({
+    options: z.array(z.string()).nullable().optional(),
+  });
 export const insertQuestionAttemptSchema = createInsertSchema(questionAttempts).omit({ id: true, attemptedAt: true });
-export const insertDailyCheckInSchema = createInsertSchema(dailyCheckIns).omit({ id: true, date: true });
+export const insertDailyCheckInSchema = createInsertSchema(dailyCheckIns)
+  .omit({ id: true, date: true })
+  .extend({
+    studiedTopics: z.array(z.string()).nullable().optional(),
+  });
 export const insertChatMessageSchema = createInsertSchema(chatMessages).omit({ id: true, createdAt: true });
 export const insertVideoContentSchema = createInsertSchema(videoContent).omit({ id: true });
 
