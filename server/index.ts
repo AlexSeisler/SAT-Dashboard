@@ -63,6 +63,9 @@ app.use((req, res, next) => {
 async function initApp() {
   const httpServer = createServer(app);
 
+  // --- Register API routes ---
+  await registerRoutes(httpServer, app);
+
   // --- Serve static assets first ---
   if (process.env.NODE_ENV === "production") {
     serveStatic(app);
@@ -70,9 +73,6 @@ async function initApp() {
     const { setupVite } = await import("./vite");
     await setupVite(httpServer, app);
   }
-
-  // --- Register API routes ---
-  await registerRoutes(httpServer, app);
 
   // --- Error handler ---
   app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
