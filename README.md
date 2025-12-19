@@ -2,7 +2,7 @@
 
 ## Overview
 
-This dashboard is designed to tackle the three primary hurdles students encounter during SAT preparation: uncertainty, inefficient study habits, and flagging motivation. It brings clarity by offering a visual readiness indicator and a comprehensive study roadmap. It optimizes effort by directing students towards high-impact topics with adaptive recommendations. Finally, it sustains motivation by making progress tangible and the learning process manageable. The outcome is a guided, intuitive experience where students are always aware of their current standing, their next steps, and the significance of their efforts.
+I took the approach of finding the core pain points that students preparing for the SAT encounter, then designed the dashboards functionality around those - uncertainty, inefficient study choices, and loss of momentum. This dashboard addresses those core challenges through a metric roadmap, always directs effort toward the next best high impact topic, and sustains motivation by making progress visible. The result is a guided experience where students always know where they stand, what to do next, and why it matters.
 
 ## Live Demo
 
@@ -10,4 +10,6 @@ Experience the SAT Roadmap Dashboard live: [https://sat-dashboard-v4s0.onrender.
 
 ## About This Project
 
-This project began as an experiment with new AI tools, which generated the base structure as an Express-Node hybrid. Adapting and deploying this unique setup presented its own set of challenges, leading to some flaky deployments. Screenshots detailing these experiences are available on the repository's release page. It's been an insightful journey, and I appreciate the opportunity to bring this vision to life.
+I was experimenting with new AI tools and it created
+the base project around an Express - Node hybrid so I figured I'd make it work, but it made
+deployment flaky so I included SS's in the release page of the repo. Thanks for the oppurtunity.
