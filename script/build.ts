@@ -30,6 +30,7 @@ const allowlist = [
 ];
 
 async function buildAll() {
+  // Clean previous build
   await rm("dist", { recursive: true, force: true });
 
   console.log("building client...");
@@ -44,18 +45,20 @@ async function buildAll() {
   ];
   const externals = allDeps.filter((dep) => !allowlist.includes(dep));
 
+  // ✅ Build server as ESM instead of CJS
   await esbuild({
     entryPoints: ["server/index.ts"],
     platform: "node",
     bundle: true,
-    format: "cjs",
-    outfile: "dist/index.cjs",
+    format: "esm",               // <--- ESM output format
+    outfile: "dist/index.mjs",   // <--- ESM file extension
     define: {
       "process.env.NODE_ENV": '"production"',
     },
     minify: true,
     external: externals,
     logLevel: "info",
+    target: ["node20"],          // <--- ensure Node 20 compatibility
   });
 }
 
