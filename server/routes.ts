@@ -38,9 +38,14 @@ export async function registerRoutes(
 
   // Get or create demo student for the app
   app.get("/api/students/demo/current", async (req, res) => {
-    try {
-      let student = await storage.getStudentByEmail("demo@satprep.com");
-      
+  console.log("DEBUG: demo route hit");
+
+  try {
+    console.log("DEBUG: before getStudentByEmail");
+
+    let student = await storage.getStudentByEmail("demo@satprep.com");
+
+    console.log("DEBUG: after getStudentByEmail", student);
       if (!student) {
         student = await storage.createStudent({
           name: "Demo Student",
