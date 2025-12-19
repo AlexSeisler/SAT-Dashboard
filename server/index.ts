@@ -1,8 +1,13 @@
 import "dotenv/config";
 import express, { type Request, Response, NextFunction } from "express";
-import { registerRoutes } from "./routes";
-import { serveStatic } from "./static";
 import { createServer } from "http";
+import { registerRoutes } from "./routes";
+import path from "path";
+import { fileURLToPath } from "url";
+import { serveStatic } from "./static";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 declare module "http" {
   interface IncomingMessage {
@@ -17,11 +22,12 @@ app.use(
     verify: (req, _res, buf) => {
       req.rawBody = buf;
     },
-  }),
+  })
 );
 
 app.use(express.urlencoded({ extended: false }));
 
+// --- Utility logger ---
 export function log(message: string, source = "express") {
   const formattedTime = new Date().toLocaleTimeString("en-US", {
     hour: "numeric",
@@ -29,10 +35,10 @@ export function log(message: string, source = "express") {
     second: "2-digit",
     hour12: true,
   });
-
   console.log(`${formattedTime} [${source}] ${message}`);
 }
 
+// --- Request logging middleware ---
 app.use((req, res, next) => {
   const start = Date.now();
   const path = req.path;
@@ -61,14 +67,7 @@ app.use((req, res, next) => {
 async function initApp() {
   const httpServer = createServer(app);
 
-  await registerRoutes(httpServer, app);
-
-  app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
-    const status = err.status || err.statusCode || 500;
-    const message = err.message || "Internal Server Error";
-    res.status(status).json({ message });
-  });
-
+  // --- Serve static assets first ---
   if (process.env.NODE_ENV === "production") {
     serveStatic(app);
   } else {
@@ -76,29 +75,34 @@ async function initApp() {
     await setupVite(httpServer, app);
   }
 
+  // --- Register API routes ---
+  await registerRoutes(httpServer, app);
+
+  // --- Catch-all route for React Router ---
+  app.get("*", (req, res, next) => {
+    if (req.path.startsWith("/api")) return next();
+    res.sendFile(path.join(__dirname, "../dist/public/index.html"));
+  });
+
+  // --- Error handler ---
+  app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
+    const status = err.status || err.statusCode || 500;
+    const message = err.message || "Internal Server Error";
+    res.status(status).json({ message });
+  });
+
   return httpServer;
 }
 
-/**
- * Local dev / local prod ONLY
- * Vercel will import the app directly and MUST NOT listen
- */
+// --- Local dev only ---
 if (!process.env.VERCEL) {
   initApp().then((httpServer) => {
     const port = parseInt(process.env.PORT || "5000", 10);
-    const host =
-      process.env.NODE_ENV === "production" ? "0.0.0.0" : "localhost";
-
+    const host = process.env.NODE_ENV === "production" ? "0.0.0.0" : "localhost";
     httpServer.listen(port, host, () => {
       log(`serving on ${host}:${port}`);
     });
   });
 }
-
-app.use((req, res) => {
-  if (!req.path.startsWith("/api")) {
-    res.status(404).send("Route not found");
-  }
-});
 
 export default app;

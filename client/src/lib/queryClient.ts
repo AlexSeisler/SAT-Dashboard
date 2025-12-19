@@ -1,7 +1,7 @@
 import { QueryClient, QueryFunction } from "@tanstack/react-query";
 
 // 🔥 Hardcoded Render base URL (use your deployed backend address)
-const API_BASE = "https://sat-dashboard-v4s0.onrender.com";
+const API_BASE = "";
 
 // --- Utility to throw on non-OK responses ---
 async function throwIfResNotOk(res: Response) {
