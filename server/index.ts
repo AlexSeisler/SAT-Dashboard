@@ -95,4 +95,10 @@ if (!process.env.VERCEL) {
   });
 }
 
+app.use((req, res) => {
+  if (!req.path.startsWith("/api")) {
+    res.status(404).send("Route not found");
+  }
+});
+
 export default app;
