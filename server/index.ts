@@ -74,12 +74,6 @@ async function initApp() {
   // --- Register API routes ---
   await registerRoutes(httpServer, app);
 
-  // --- Catch-all route for React Router ---
-  app.get("*", (req, res, next) => {
-    if (req.path.startsWith("/api")) return next();
-    res.sendFile(path.join(__dirname, "../dist/public/index.html"));
-  });
-
   // --- Error handler ---
   app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
     const status = err.status || err.statusCode || 500;
